@@ -1,10 +1,10 @@
 # Gemini CLI Context for Nanshan Workstation Configuration
 
-This `GEMINI.md` file provides essential context for the Gemini CLI when interacting with the `nanshan_config` repository.
+This `GEMINI.md` file provides essential context for the Gemini CLI when interacting with the `nanshan-infra` repository.
 
 ## Directory Overview
 
-This repository (`nanshan_config`) serves as the configuration management and provisioning toolkit for the "Nanshan Workstation," a dedicated machine for Deep Learning and Synthetic Aperture Radar (SAR) operations. It embodies an "Atomic Infrastructure-as-Code" philosophy, aiming to keep the Host OS distinct from the development environment for stability and rapid recovery.
+This repository (`nanshan-infra`) serves as the configuration management and provisioning toolkit for the "Nanshan Workstation," a dedicated machine for Deep Learning and Synthetic Aperture Radar (SAR) operations. It embodies an "Atomic Infrastructure-as-Code" philosophy, aiming to keep the Host OS distinct from the development environment for stability and rapid recovery.
 
 The repository primarily contains:
 *   **Documentation:** Explaining the workstation's setup, philosophy, and recovery procedures.
@@ -25,19 +25,19 @@ The general workflow for setting up and maintaining the Nanshan Workstation usin
 
 1.  **Host Provisioning:**
     *   After a fresh Pop!_OS install, run `setup_nanshan.sh` on the host machine.
-    *   `cd ~/Projects/nanshan_config` (assuming this repo is cloned here).
+    *   `cd ~/Projects/nanshan-infra` (assuming this repo is cloned here).
     *   `chmod +x setup_nanshan.sh`
     *   `./setup_nanshan.sh`
     *   Reboot the host system as instructed by the script.
 
 2.  **SAR Lab Setup (Distrobox Container):**
     *   Ensure Distrobox is installed (handled by `setup_nanshan.sh`).
-    *   From the host machine, navigate to this repository: `cd ~/Projects/nanshan_config`.
+    *   From the host machine, navigate to this repository: `cd ~/Projects/nanshan-infra`.
     *   Create the `sar-lab` container using the `distrobox.ini` configuration:
         `distrobox assemble create --file distrobox.ini`
     *   Enter the newly created `sar-lab` container: `distrobox enter sar-lab`.
     *   Inside the `sar-lab` container, run `setup_lab.sh` to finalize its configuration:
-        `cd ~/Projects/nanshan_config` (or wherever the repo is mounted inside the container).
+        `cd ~/Projects/nanshan-infra` (or wherever the repo is mounted inside the container).
         `chmod +x setup_lab.sh`
         `./setup_lab.sh`
     *   Source the `.bashrc` inside the container: `source ~/.bashrc`.

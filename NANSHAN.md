@@ -14,7 +14,7 @@
 ---
 
 ## 2. Operational Philosophy
-Nostromo follows an **"Atomic" Infrastructure-as-Code** philosophy. The goal is to keep the Host OS distinct from the Development Environment to ensure stability and rapid recovery.
+Nanshan follows an **"Atomic" Infrastructure-as-Code** philosophy. The goal is to keep the Host OS distinct from the Development Environment to ensure stability and rapid recovery.
 
 ### The Three Layers
 1.  **Layer 0: Host OS (Pop!_OS)**
@@ -38,7 +38,7 @@ Filesystem layout optimized for context separation.
 ```text
 /home/jason/
 ├── Projects/          # Active Code (Git Repos)
-│   ├── nostromo-config/ # THIS REPO (Scripts & Dotfiles)
+│   ├── nanshan-infra/   # THIS REPO (Scripts & Dotfiles)
 │   ├── marlow/         # DRL Agent
 ├── Areas/             # Ongoing Responsibility (Admin, Docs)
 ├── Resources/         # Static Assets
@@ -47,20 +47,22 @@ Filesystem layout optimized for context separation.
 └── Archives/          # Cold Storage
 
 4. Provisioning Scripts
-A. Host Provisioning (setup_nostromo.sh)
+A. Host Provisioning (setup_nanshan.sh)
 
 Run this ONCE after a fresh Pop!_OS install to hydrate the host.
 Bash
 
 #!/bin/bash
-# NOSTROMO PROVISIONING v2.1
-# Stack: Pop!_OS + UV + Helix + Zed + Zen + Distrobox
+# NANSHAN PROVISIONING v4.1
+# Stack: Pop!_OS + SSH + Tailscale + Node20 + Gemini + UV + Chezmoi + Helix
 
 set -e
 
-echo ">>> [1/6] HOST SYSTEM HYGIENE..."
+echo ">>> [1/11] HOST SYSTEM HYGIENE..."
 sudo apt update && sudo apt upgrade -y
-sudo apt install -y curl git build-essential distrobox podman
+sudo apt install -y curl git build-essential distrobox podman ripgrep fd-find openssh-server
+
+# ... (rest of the script as in setup_nanshan.sh)
 
 echo ">>> [2/6] INSTALLING 'UV' (Python Manager)..."
 curl -LsSf [https://astral.sh/uv/install.sh](https://astral.sh/uv/install.sh) | sh
@@ -135,12 +137,12 @@ If you install a bad package or break your Python environment inside the sar-lab
     Edit Config (Optional): If the break was caused by a bad init hook, edit the definition:
     Bash
 
-    hx ~/1_Projects/nostromo-config/distrobox.ini
+    hx ~/Projects/nanshan-infra/distrobox.ini
 
     Rebuild it:
     Bash
 
-    cd ~/1_Projects/nostromo-config
+    cd ~/Projects/nanshan-infra
     distrobox assemble create --file distrobox.ini
 
     Resume: Enter the lab (distrobox enter sar-lab). Your project files in ~/1_Projects are untouched.
@@ -159,14 +161,14 @@ If an update breaks the OS or you lose access to the system:
 
     Restore Config:
 
-        Clone your config repo (or copy from backup): git clone <your-repo-url> ~/1_Projects/nostromo-config
+        Clone your config repo (or copy from backup): git clone <your-repo-url> ~/Projects/nanshan-infra
 
     Run Host Provisioning:
     Bash
 
-    cd ~/1_Projects/nostromo-config
-    chmod +x setup_nostromo.sh
-    ./setup_nostromo.sh
+    cd ~/Projects/nanshan-infra
+    chmod +x setup_nanshan.sh
+    ./setup_nanshan.sh
 
     Reboot: Restart to finalize user groups.
 

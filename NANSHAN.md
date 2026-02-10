@@ -54,7 +54,7 @@ Bash
 
 #!/bin/bash
 # NANSHAN PROVISIONING v4.1
-# Stack: Pop!_OS + SSH + Tailscale + Node20 + Gemini + UV + Chezmoi + Helix
+# Stack: Pop!_OS + SSH + Tailscale + Node20 + Gemini + UV + Chezmoi + Helix + Atuin
 
 set -e
 

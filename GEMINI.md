@@ -16,7 +16,7 @@ The repository primarily contains:
 
 *   **`NANSHAN.md`**: The primary documentation file detailing hardware specifications, operational philosophy (Host OS, GUI Apps, SAR Lab layers), directory structure, provisioning scripts, and recovery procedures for the Nanshan Workstation.
 *   **`distrobox.ini`**: A configuration file for `distrobox` that defines the `sar-lab` container. It specifies the base image (`ubuntu:24.04`), enables NVIDIA support, and lists system dependencies and entry hooks for configuring the container's environment.
-*   **`setup_nanshan.sh`**: This script is responsible for provisioning the *host* Pop!_OS system. It handles system updates, installs essential tools (e.g., git, distrobox, podman, SSH, Tailscale), sets up Node.js, Gemini CLI (for the host), `uv` and Python tools (ruff, basedpyright), Chezmoi (dotfile manager), Zoxide, FZF, Starship, Helix editor, and Flatpak applications. It also configures global Git settings.
+*   **`setup_nanshan.sh`**: This script is responsible for provisioning the *host* Pop!_OS system. It handles system updates, installs essential tools (e.g., git, distrobox, podman, SSH, Tailscale), sets up Node.js, Gemini CLI (for the host), `uv` and Python tools (ruff, basedpyright), Chezmoi (dotfile manager), Zoxide, FZF, Atuin, Starship, Helix editor, and Flatpak applications. It also configures global Git settings.
 *   **`setup_lab.sh`**: This script is designed to be executed *inside* the `sar-lab` Distrobox container. It further configures the development environment by upgrading Node.js, installing `uv` (Python manager), configuring NPM for user-space package installation, installing the Gemini CLI and its Conductor extension, installing Python 3.12 via `uv`, and setting up Starship.
 
 ## Usage

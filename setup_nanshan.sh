@@ -1,6 +1,6 @@
 #!/bin/bash
 # NANSHAN PROVISIONING v4.1 (Atomic DRL Edition)
-# Stack: Pop!_OS + SSH + Tailscale + Node20 + Gemini + UV + Chezmoi + Helix
+# Stack: Pop!_OS + SSH + Tailscale + Node20 + Gemini + UV + Chezmoi + Helix + Atuin
 
 set -e
 
@@ -60,11 +60,16 @@ else
     chezmoi update
 fi
 
-echo ">>> [7/11] INSTALLING NAVIGATION (Zoxide + FZF)..."
+echo ">>> [7/11] INSTALLING NAVIGATION (Zoxide + FZF + Atuin)..."
 curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
+
 if [ ! -d "$HOME/.fzf" ]; then
     git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
     ~/.fzf/install --all --key-bindings --completion --no-update-rc
+fi
+
+if ! command -v atuin &> /dev/null; then
+    curl --proto '=https' --tlsv1.2 -sSf https://setup.atuin.sh | sh
 fi
 
 echo ">>> [8/11] INSTALLING STARSHIP (Prompt)..."

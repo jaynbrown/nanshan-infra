@@ -1,0 +1,31 @@
+# Get a newline between prompts for better readability
+add_newline = false
+
+# The "Starship" character/prompt
+[character]
+success_symbol = "[➜](bold green)"
+error_symbol = "[➜](bold red)"
+
+# Display the container name if inside Distrobox (sar-lab)
+[container]
+format = '[$symbol \[$name\]]($style) '
+symbol = "⬢"
+style = "bold magenta"
+disabled = false
+
+# Show the hostname (nanshan) ONLY when SSH'd in
+[hostname]
+ssh_only = true
+format = "on [$hostname](bold yellow) "
+disabled = false
+
+# Show Python version (critical for Nostromo/Spyglass)
+[python]
+symbol = "🐍 "
+format = 'via [${symbol}${version}]($style) '
+style = "bold yellow"
+
+# Clean directory path
+[directory]
+style = "bold blue"
+truncate_to_repo = true

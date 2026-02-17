@@ -133,5 +133,22 @@ if ! grep -qF "/mnt/vault/homelab_backups" /etc/exports; then
     sudo exportfs -arv
 fi
 
+echo ">>> Deploying ZFS Scrub Systemd Timer..."
+
+# Define source and destination
+SOURCE_DIR="$HOME/.local/share/chezmoi/systemd"
+DEST_DIR="/etc/systemd/system"
+
+# Copy the files to the system directory
+sudo cp "$SOURCE_DIR/zfs-scrub-vault.service" "$DEST_DIR/"
+sudo cp "$SOURCE_DIR/zfs-scrub-vault.timer" "$DEST_DIR/"
+
+# Set correct root permissions
+sudo chown root:root "$DEST_DIR/zfs-scrub-vault."*
+sudo chmod 644 "$DEST_DIR/zfs-scrub-vault."*
+
+# Reload and enable
+sudo systemctl daemon-reload
+sudo systemctl enable --now zfs-scrub-vault.timer
 
 echo ">>> DONE. PLEASE REBOOT OR RUN: source ~/.bashrc"

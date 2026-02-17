@@ -127,7 +127,7 @@ sudo chown -R $USER:$USER /mnt/vault
 
 echo ">>> Configuring NFS Homelab Export..."
 # Only add the export line if it's missing
-EXPORT_LINE="/mnt/vault/homelab_backups 192.168.100.10/24(rw,async,no_subtree_check,no_root_squash)"
+EXPORT_LINE="/mnt/vault/homelab_backups 192.168.1.00/24(rw,async,no_subtree_check,no_root_squash)"
 if ! grep -qF "/mnt/vault/homelab_backups" /etc/exports; then
     echo "$EXPORT_LINE" | sudo tee -a /etc/exports
     sudo exportfs -arv

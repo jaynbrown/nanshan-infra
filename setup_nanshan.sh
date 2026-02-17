@@ -85,7 +85,7 @@ mkdir -p "$HOME/.local/bin"
 
 # 2. Download and extract the latest static binary
 # Using 25.01 as the current stable release
-HELIX_VER="25.01"
+HELIX_VER="25.07.1"
 curl -L "https://github.com/helix-editor/helix/releases/download/$HELIX_VER/helix-$HELIX_VER-x86_64-linux.tar.xz" -o /tmp/helix.tar.xz
 tar -xJf /tmp/helix.tar.xz -C /tmp/
 

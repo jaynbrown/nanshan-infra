@@ -127,7 +127,7 @@ sudo chown -R $USER:$USER /mnt/vault
 
 echo ">>> Configuring NFS Homelab Export..."
 # Only add the export line if it's missing
-EXPORT_LINE="/mnt/vault/homelab_backups 192.168.1.00/24(rw,async,no_subtree_check,no_root_squash)"
+EXPORT_LINE="/mnt/vault/homelab_backups 192.168.1.0/24(rw,async,no_subtree_check,no_root_squash)"
 if ! grep -qF "/mnt/vault/homelab_backups" /etc/exports; then
     echo "$EXPORT_LINE" | sudo tee -a /etc/exports
     sudo exportfs -arv
@@ -136,7 +136,7 @@ fi
 echo ">>> Deploying ZFS Scrub Systemd Timer..."
 
 # Define source and destination
-SOURCE_DIR="$(chezmoi source-path)/systemd"
+SOURCE_DIR="$($HOME/.local/bin/chezmoi source-path)/systemd"
 DEST_DIR="/etc/systemd/system"
 
 sudo cp "$SOURCE_DIR/zfs-scrub-vault.service" "$DEST_DIR/"

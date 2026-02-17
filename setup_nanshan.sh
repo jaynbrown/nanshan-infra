@@ -80,8 +80,23 @@ echo ">>> [8/11] INSTALLING STARSHIP (Prompt)..."
 curl -sS https://starship.rs/install.sh | sh -s -- -y
 
 echo ">>> [9/11] CONFIGURING HELIX (Editor)..."
-sudo add-apt-repository ppa:maveonair/helix-editor -y
-sudo apt update && sudo apt install -y helix
+# 1. Create local bin if it doesn't exist
+mkdir -p "$HOME/.local/bin"
+
+# 2. Download and extract the latest static binary
+# Using 25.01 as the current stable release
+HELIX_VER="25.01"
+curl -L "https://github.com/helix-editor/helix/releases/download/$HELIX_VER/helix-$HELIX_VER-x86_64-linux.tar.xz" -o /tmp/helix.tar.xz
+tar -xJf /tmp/helix.tar.xz -C /tmp/
+
+# 3. Move the binary and runtime to user-controlled paths
+mv /tmp/helix-$HELIX_VER-x86_64-linux/hx "$HOME/.local/bin/"
+mkdir -p "$HOME/.config/helix"
+# Move runtime files so themes and LSP support work
+cp -rn /tmp/helix-$HELIX_VER-x86_64-linux/runtime "$HOME/.config/helix/"
+
+# Cleanup
+rm -rf /tmp/helix.tar.xz /tmp/helix-$HELIX_VER-x86_64-linux
 
 echo ">>> [10/11] INSTALLING GUI APPS (FLATPAK)..."
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo

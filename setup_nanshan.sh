@@ -136,10 +136,9 @@ fi
 echo ">>> Deploying ZFS Scrub Systemd Timer..."
 
 # Define source and destination
-SOURCE_DIR="$HOME/.local/share/chezmoi/systemd"
+SOURCE_DIR="$(chezmoi source-path)/systemd"
 DEST_DIR="/etc/systemd/system"
 
-# Copy the files to the system directory
 sudo cp "$SOURCE_DIR/zfs-scrub-vault.service" "$DEST_DIR/"
 sudo cp "$SOURCE_DIR/zfs-scrub-vault.timer" "$DEST_DIR/"
 

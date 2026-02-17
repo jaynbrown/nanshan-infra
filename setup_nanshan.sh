@@ -72,6 +72,10 @@ if ! command -v atuin &> /dev/null; then
     curl --proto '=https' --tlsv1.2 -sSf https://setup.atuin.sh | sh
 fi
 
+echo ">>> Locking in Atuin pre-exec hook..."
+# Download the hook script silently
+curl -sLo ~/.bash-preexec.sh https://raw.githubusercontent.com/rcaloras/bash-preexec/master/bash-preexec.sh
+
 echo ">>> [8/11] INSTALLING STARSHIP (Prompt)..."
 curl -sS https://starship.rs/install.sh | sh -s -- -y
 
@@ -90,5 +94,44 @@ git config --global user.email "58671324+jaynbrown@users.noreply.github.com"
 
 # Apply dotfiles to ensure clean .bashrc and configs
 ~/.local/bin/chezmoi apply --force
+
+# ==========================================
+# ZFS VAULT & NFS BACKUP TARGET
+# ==========================================
+echo ">>> Installing ZFS and NFS dependencies..."
+sudo apt install -y zfsutils-linux zfs-dkms linux-headers-$(uname -r) nfs-kernel-server
+
+echo ">>> Configuring ZFS ARC limit to 4GB..."
+if ! grep -qF "zfs_arc_max=4294967296" /etc/modprobe.d/zfs.conf 2>/dev/null; then
+    echo "options zfs zfs_arc_max=4294967296" | sudo tee /etc/modprobe.d/zfs.conf
+    sudo update-initramfs -u -k all
+fi
+
+echo ">>> Assembling ZFS Vault..."
+# Only attempt to create the pool if it doesn't already exist
+if ! zpool list vault >/dev/null 2>&1; then
+    sudo zpool create -f -o ashift=12 vault mirror \
+        /dev/disk/by-id/ata-ST4000NM0035_WAICK95J \
+        /dev/disk/by-id/ata-ST4000NM0035_WAICK9AA
+else
+    echo "    Vault pool already exists. Skipping creation."
+fi
+
+echo ">>> Configuring Vault datasets and permissions..."
+sudo zfs set compression=lz4 vault
+sudo zfs set mountpoint=/mnt/vault vault
+sudo zfs create -p vault/sar_data
+sudo zfs create -p vault/homelab_backups
+sudo zfs set quota=2T vault/homelab_backups
+sudo chown -R $USER:$USER /mnt/vault
+
+echo ">>> Configuring NFS Homelab Export..."
+# Only add the export line if it's missing
+EXPORT_LINE="/mnt/vault/homelab_backups 192.168.100.10/24(rw,async,no_subtree_check,no_root_squash)"
+if ! grep -qF "/mnt/vault/homelab_backups" /etc/exports; then
+    echo "$EXPORT_LINE" | sudo tee -a /etc/exports
+    sudo exportfs -arv
+fi
+
 
 echo ">>> DONE. PLEASE REBOOT OR RUN: source ~/.bashrc"

@@ -123,13 +123,26 @@ if ! grep -qF "zfs_arc_max=4294967296" /etc/modprobe.d/zfs.conf 2>/dev/null; the
 fi
 
 echo ">>> Assembling ZFS Vault..."
-# Only attempt to create the pool if it doesn't already exist
-if ! zpool list vault >/dev/null 2>&1; then
-    sudo zpool create -f -o ashift=12 vault mirror \
-        /dev/disk/by-id/ata-ST4000NM0035_WAICK95J \
-        /dev/disk/by-id/ata-ST4000NM0035_WAICK9AA
+VAULT_POOL="vault"
+VAULT_DISKS=(
+    /dev/disk/by-id/ata-ST4000NM0035_WAICK95J
+    /dev/disk/by-id/ata-ST4000NM0035_WAICK9AA
+)
+
+if sudo zpool list "$VAULT_POOL" >/dev/null 2>&1; then
+    # Case 1: pool is already imported on this OS install
+    echo "    Vault pool already imported. Skipping."
+elif sudo zpool import -d /dev/disk/by-id 2>/dev/null | grep -qE "^[[:space:]]*pool: ${VAULT_POOL}$"; then
+    # Case 2: pool exists on disk but isn't imported (e.g. after an OS reinstall).
+    # NEVER re-create here; that would destroy the data. Import it instead.
+    # -f is required because a fresh install has a new hostid; import -f does not modify data.
+    echo "    Found existing vault pool on disk. Importing (data preserved)..."
+    sudo zpool import -d /dev/disk/by-id -f "$VAULT_POOL"
 else
-    echo "    Vault pool already exists. Skipping creation."
+    # Case 3: genuinely new disks. No -f: zpool will refuse (and set -e will abort)
+    # if the disks carry existing partitions or filesystem labels.
+    echo "    No existing vault pool found. Creating new mirror..."
+    sudo zpool create -o ashift=12 "$VAULT_POOL" mirror "${VAULT_DISKS[@]}"
 fi
 
 echo ">>> Configuring Vault datasets and permissions..."

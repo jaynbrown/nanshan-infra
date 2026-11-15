@@ -174,4 +174,7 @@ If an update breaks the OS or you lose access to the system:
 
     Rebuild Lab: Run the distrobox assemble command from Scenario A.
 
-    Mount Data: Remount the 4TB ZFS array to ~/3_Resources/Datasets.
+    Mount Data: setup_nanshan.sh detects the existing `vault` pool and imports it (it never re-creates a pool it finds). It mounts at /mnt/vault.
+    Manual import if needed (does not modify data):
+    sudo zpool import -d /dev/disk/by-id -f vault
+    Do NOT run `zpool create` on the vault disks; that erases the mirror.

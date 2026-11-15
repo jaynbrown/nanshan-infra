@@ -10,7 +10,14 @@ sudo apt install -y curl git build-essential distrobox podman ripgrep fd-find op
 
 echo ">>> [2/11] SECURING THE PERIMETER (Firewall & SSH)..."
 sudo systemctl enable --now ssh
-sudo ufw allow ssh
+# SSH only from the home LANs; Tailscale is allowed via tailscale0 in step 3.
+# 192.168.100.0/24 = Nanshan's subnet, 192.168.1.0/24 = rest of the home network (suhaili etc.)
+SSH_LAN_SUBNETS="192.168.100.0/24 192.168.1.0/24"
+for subnet in $SSH_LAN_SUBNETS; do
+    sudo ufw allow from "$subnet" to any port 22 proto tcp comment 'SSH from LAN'
+done
+# Remove the old allow-from-anywhere rule (added AFTER the LAN rules so an SSH session isn't cut off)
+sudo ufw delete allow ssh >/dev/null 2>&1 || true
 sudo ufw allow 41641/udp # Tailscale Port
 # Enable firewall
 echo "y" | sudo ufw enable

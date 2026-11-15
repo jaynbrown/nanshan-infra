@@ -61,7 +61,7 @@ The scripts are the source of truth; this section only summarises them. See [REA
 ### A. Host (`setup_nanshan.sh`)
 Run after a fresh Pop!_OS install. Re-running it is supported, but note that it runs `apt upgrade` and `chezmoi apply --force` (commit any local dotfile edits first).
 
-1. APT base packages, OpenSSH, ufw firewall.
+1. APT base packages, OpenSSH, ufw firewall (SSH allowed only from 192.168.100.0/24, 192.168.1.0/24 and Tailscale).
 2. Tailscale (`tailscale up` opens a browser login).
 3. Node.js 20, user-space npm prefix, Gemini CLI + Conductor extension.
 4. `uv`, `ruff`, `basedpyright`.

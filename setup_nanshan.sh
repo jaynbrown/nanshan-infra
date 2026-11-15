@@ -197,4 +197,39 @@ sudo chmod 644 "$DEST_DIR/zfs-scrub-vault."*
 sudo systemctl daemon-reload
 sudo systemctl enable --now zfs-scrub-vault.timer
 
+echo ">>> Configuring automatic ZFS snapshots (sanoid)..."
+# Snapshots protect against deletion/overwrite; the mirror only protects against disk failure.
+# NOTE: still no off-machine copy and no ZED alerting; both are open gaps.
+sudo apt install -y sanoid
+sudo mkdir -p /etc/sanoid
+# Overwritten on every run so this script stays the source of truth
+sudo tee /etc/sanoid/sanoid.conf >/dev/null <<'SANOID'
+[vault/sar_data]
+    use_template = data
+
+# PBS dedups and prunes itself; short retention guards against a client
+# wiping the datastore. Snapshot space counts toward the 2T quota.
+[vault/homelab_backups]
+    use_template = backups
+
+[template_data]
+    frequently = 0
+    hourly = 24
+    daily = 30
+    monthly = 6
+    yearly = 0
+    autosnap = yes
+    autoprune = yes
+
+[template_backups]
+    frequently = 0
+    hourly = 0
+    daily = 7
+    monthly = 0
+    yearly = 0
+    autosnap = yes
+    autoprune = yes
+SANOID
+sudo systemctl enable --now sanoid.timer
+
 echo ">>> DONE. PLEASE REBOOT OR RUN: source ~/.bashrc"

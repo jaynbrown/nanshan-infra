@@ -151,15 +151,34 @@ sudo zfs set mountpoint=/mnt/vault vault
 sudo zfs create -p vault/sar_data
 sudo zfs create -p vault/homelab_backups
 sudo zfs set quota=2T vault/homelab_backups
-sudo chown -R $USER:$USER /mnt/vault
+# Top-level ownership only: a recursive chown would clobber files written by NFS clients
+sudo chown "$USER:$USER" /mnt/vault/sar_data
 
 echo ">>> Configuring NFS Homelab Export..."
-# Only add the export line if it's missing
-EXPORT_LINE="/mnt/vault/homelab_backups 192.168.1.0/24(rw,async,no_subtree_check,no_root_squash)"
-if ! grep -qF "/mnt/vault/homelab_backups" /etc/exports; then
-    echo "$EXPORT_LINE" | sudo tee -a /etc/exports
-    sudo exportfs -arv
-fi
+# Space-separated client IPs. 192.168.1.3 = suhaili (Proxmox Backup Server)
+NFS_CLIENTS="192.168.1.3"
+NFS_EXPORT_DIR="/mnt/vault/homelab_backups"
+# PBS runs as 'backup' (uid/gid 34). all_squash maps every client user, root included,
+# to that uid: no client gets root on the share, and PBS can still own its datastore.
+NFS_OPTS="rw,sync,no_subtree_check,all_squash,anonuid=34,anongid=34"
+
+sudo chown 34:34 "$NFS_EXPORT_DIR"
+
+EXPORT_LINE="$NFS_EXPORT_DIR"
+for client in $NFS_CLIENTS; do
+    EXPORT_LINE+=" ${client}(${NFS_OPTS})"
+done
+# Own file under exports.d so re-runs replace the export instead of appending
+sudo mkdir -p /etc/exports.d
+echo "$EXPORT_LINE" | sudo tee /etc/exports.d/homelab_backups.exports >/dev/null
+# Remove the legacy LAN-wide no_root_squash entry from /etc/exports, if present
+sudo sed -i "\|^${NFS_EXPORT_DIR}[[:space:]]|d" /etc/exports
+sudo exportfs -ra
+
+# Firewall: NFSv4 (TCP 2049) only from the listed clients
+for client in $NFS_CLIENTS; do
+    sudo ufw allow from "$client" to any port 2049 proto tcp comment 'NFS homelab_backups'
+done
 
 echo ">>> Deploying ZFS Scrub Systemd Timer..."
 

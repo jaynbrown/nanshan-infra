@@ -14,34 +14,19 @@ The repository primarily contains:
 
 ## Key Files
 
-*   **`NANSHAN.md`**: The primary documentation file detailing hardware specifications, operational philosophy (Host OS, GUI Apps, SAR Lab layers), directory structure, provisioning scripts, and recovery procedures for the Nanshan Workstation.
-*   **`distrobox.ini`**: A configuration file for `distrobox` that defines the `sar-lab` container. It specifies the base image (`ubuntu:24.04`), enables NVIDIA support, and lists system dependencies and entry hooks for configuring the container's environment.
-*   **`setup_nanshan.sh`**: This script is responsible for provisioning the *host* Pop!_OS system. It handles system updates, installs essential tools (e.g., git, distrobox, podman, SSH, Tailscale), sets up Node.js, Gemini CLI (for the host), `uv` and Python tools (ruff, basedpyright), Chezmoi (dotfile manager), Zoxide, FZF, Atuin, Starship, Helix editor, and Flatpak applications. It also configures global Git settings.
-*   **`setup_lab.sh`**: This script is designed to be executed *inside* the `sar-lab` Distrobox container. It further configures the development environment by upgrading Node.js, installing `uv` (Python manager), configuring NPM for user-space package installation, installing the Gemini CLI and its Conductor extension, installing Python 3.12 via `uv`, and setting up Starship.
+*   **`NANSHAN.md`**: The primary documentation: hardware, operational philosophy (Host OS, Flatpak apps, Distrobox labs), directory layout, provisioning summary, ZFS `vault` storage, and recovery procedures.
+*   **`README.md`**: Step-by-step reinstall order (SSH key from Bitwarden, clone, host provisioning, lab setup).
+*   **`setup_nanshan.sh`**: Provisions the *host* Pop!_OS system: APT tools, SSH + ufw, Tailscale, Node.js 20 + Gemini CLI, `uv`/ruff/basedpyright, chezmoi dotfiles, zoxide/fzf/atuin/Starship, Helix, Flatpak apps, git identity, and storage (ZFS `vault` mirror, NFS export for Proxmox Backup Server, scrub timer, sanoid snapshots).
+*   **`distrobox.ini`**: Defines the `sar-lab` (Ubuntu 24.04 + NVIDIA, geospatial/QGIS/rendering packages, vault mount) and `ai-lab` (Ollama) containers.
+*   **`setup_lab.sh`**: A health check run *inside* `sar-lab`. It verifies the Gemini CLI and `uv` shared from the host via `$HOME`, installs Python 3.12 via `uv`, and installs Starship if missing.
+*   **`distrobox_ai.ini`**: Legacy and superseded by `distrobox.ini`; do not use.
+
+## Important Constraints
+
+*   **Never run `zpool create` on the vault disks.** After an OS reinstall the pool must be imported (`setup_nanshan.sh` does this automatically).
+*   Dotfiles are managed in a separate chezmoi repo (`jaynbrown/dotfiles`); edit them there, not in `~`.
+*   The scripts are the source of truth. Docs summarise them and should not embed copies.
 
 ## Usage
 
-The general workflow for setting up and maintaining the Nanshan Workstation using this repository is as follows:
-
-1.  **Host Provisioning:**
-    *   After a fresh Pop!_OS install, run `setup_nanshan.sh` on the host machine.
-    *   `cd ~/Projects/nanshan-infra` (assuming this repo is cloned here).
-    *   `chmod +x setup_nanshan.sh`
-    *   `./setup_nanshan.sh`
-    *   Reboot the host system as instructed by the script.
-
-2.  **SAR Lab Setup (Distrobox Container):**
-    *   Ensure Distrobox is installed (handled by `setup_nanshan.sh`).
-    *   From the host machine, navigate to this repository: `cd ~/Projects/nanshan-infra`.
-    *   Create the `sar-lab` container using the `distrobox.ini` configuration:
-        `distrobox assemble create --file distrobox.ini`
-    *   Enter the newly created `sar-lab` container: `distrobox enter sar-lab`.
-    *   Inside the `sar-lab` container, run `setup_lab.sh` to finalize its configuration:
-        `cd ~/Projects/nanshan-infra` (or wherever the repo is mounted inside the container).
-        `chmod +x setup_lab.sh`
-        `./setup_lab.sh`
-    *   Source the `.bashrc` inside the container: `source ~/.bashrc`.
-
-3.  **Recovery Procedures:**
-    *   **Corrupted Lab:** If the `sar-lab` Distrobox container becomes corrupted, it can be nuked and rebuilt using the commands described in `NANSHAN.md` under "Scenario A."
-    *   **Corrupted Host OS:** If the host Pop!_OS breaks, a clean reinstall, cloning this repository, and re-running `setup_nanshan.sh` will restore the system, as detailed in `NANSHAN.md` under "Scenario B."
+Follow `README.md` for install order and `NANSHAN.md` section 6 for recovery (Scenario A: rebuild a lab; Scenario B: reinstall the host).

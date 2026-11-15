@@ -51,20 +51,24 @@ cd nanshan-infra
 
 ### 3. Host Provisioning
 
-Run the host setup script to install system tools, GUI apps, and configure the environment:
+Run the host setup script to install system tools, GUI apps, remote access, and storage:
 
 ```bash
 chmod +x setup_nanshan.sh
 ./setup_nanshan.sh
 ```
 
-**Note:** This script will prompt for your sudo password and may require a reboot upon completion.
+**Notes:**
+* It prompts for your sudo password, and `tailscale up` opens a browser login partway through.
+* It sets up the ZFS `vault` pool on the two 4TB HDDs. If the pool already exists (e.g. after an OS reinstall) it is **imported, not re-created**, so data is preserved.
+* It also configures the NFS backup export, the monthly scrub timer, and sanoid snapshots. See `NANSHAN.md` section 5.
+* Reboot when it finishes.
 
 ### 4. SAR Lab Setup (Container)
 
 The development environment runs inside a Distrobox container to keep the host clean.
 
-1.  **Create the container:**
+1.  **Create the containers** (`sar-lab` and `ai-lab`):
     ```bash
     distrobox assemble create --file distrobox.ini
     ```
@@ -72,7 +76,7 @@ The development environment runs inside a Distrobox container to keep the host c
     ```bash
     distrobox enter sar-lab
     ```
-3.  **Finalize Lab setup (Inside Container):**
+3.  **Verify the Lab (Inside Container):** `setup_lab.sh` is a health check. It confirms the Gemini CLI and `uv` shared from the host, installs Python 3.12, and installs Starship if missing.
     ```bash
     cd ~/Projects/nanshan-infra
     chmod +x setup_lab.sh
@@ -82,17 +86,21 @@ The development environment runs inside a Distrobox container to keep the host c
 
 ## 📂 Repository Structure
 
-- `setup_nanshan.sh`: Host OS provisioning script.
-- `distrobox.ini`: Definition for the `sar-lab` development container.
-- `setup_lab.sh`: Post-creation script for the `sar-lab` container.
-- `NANSHAN.md`: Detailed hardware specs and operational philosophy.
+- `setup_nanshan.sh`: Host OS provisioning script (tools, apps, Tailscale, ZFS vault, NFS, snapshots).
+- `distrobox.ini`: Definitions for the `sar-lab` (development) and `ai-lab` (local LLM) containers.
+- `setup_lab.sh`: Health check run inside `sar-lab`.
+- `distrobox_ai.ini`: Legacy, superseded by `distrobox.ini`. Do not use; it redefines `sar-lab` without the vault mount.
+- `NANSHAN.md`: Hardware specs, operational philosophy, storage layout, and recovery procedures.
 - `GEMINI.md`: Context for the Gemini CLI agent.
+
+Dotfiles live in a separate chezmoi repo (`jaynbrown/dotfiles`), which `setup_nanshan.sh` clones and applies.
 
 ## 🛠 Maintenance
 
-- **Update Host:** Run `setup_nanshan.sh` again or use `chezmoi update`.
+- **Update dotfiles only:** `chezmoi update`.
+- **Re-run host provisioning:** `./setup_nanshan.sh` is safe to re-run, but it runs `apt upgrade` and `chezmoi apply --force`. Commit any local dotfile edits to chezmoi first, or they will be overwritten.
 - **Nuke & Rebuild Lab:**
   ```bash
   distrobox rm -f sar-lab
-  distrobox assemble create --file distrobox.ini
+  distrobox assemble create --file distrobox.ini --name sar-lab
   ```

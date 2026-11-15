@@ -19,7 +19,6 @@ The repository primarily contains:
 *   **`setup_nanshan.sh`**: Provisions the *host* Pop!_OS system: APT tools, SSH + ufw, Tailscale, Node.js 20 + Gemini CLI, `uv`/ruff/basedpyright, chezmoi dotfiles, zoxide/fzf/atuin/Starship, Helix, Flatpak apps, git identity, and storage (ZFS `vault` mirror, NFS export for Proxmox Backup Server, scrub timer, sanoid snapshots).
 *   **`distrobox.ini`**: Defines the `sar-lab` (Ubuntu 24.04 + NVIDIA, geospatial/QGIS/rendering packages, vault mount) and `ai-lab` (Ollama) containers.
 *   **`setup_lab.sh`**: A health check run *inside* `sar-lab`. It verifies the Gemini CLI and `uv` shared from the host via `$HOME`, installs Python 3.12 via `uv`, and installs Starship if missing.
-*   **`distrobox_ai.ini`**: Legacy and superseded by `distrobox.ini`; do not use.
 
 ## Important Constraints
 

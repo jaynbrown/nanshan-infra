@@ -89,7 +89,6 @@ The development environment runs inside a Distrobox container to keep the host c
 - `setup_nanshan.sh`: Host OS provisioning script (tools, apps, Tailscale, ZFS vault, NFS, snapshots).
 - `distrobox.ini`: Definitions for the `sar-lab` (development) and `ai-lab` (local LLM) containers.
 - `setup_lab.sh`: Health check run inside `sar-lab`.
-- `distrobox_ai.ini`: Legacy, superseded by `distrobox.ini`. Do not use; it redefines `sar-lab` without the vault mount.
 - `NANSHAN.md`: Hardware specs, operational philosophy, storage layout, and recovery procedures.
 - `GEMINI.md`: Context for the Gemini CLI agent.
 

@@ -53,8 +53,12 @@ export PATH="$HOME/.local/bin:$PATH"
 
 if [ ! -d "$HOME/.local/share/chezmoi" ]; then
     echo "Restoring dotfiles from GitHub..."
-    # Try to clone repo and apply immediately; fall back to empty init if repo missing
-    chezmoi init --apply https://github.com/jaynbrown/dotfiles.git || chezmoi init
+    # SSH, matching how this repo is cloned (README step 1 restores the key).
+    # No silent fallback: later steps (.bashrc, ZFS scrub units) depend on this repo.
+    if ! chezmoi init --apply git@github.com:jaynbrown/dotfiles.git; then
+        echo "!!! Could not clone dotfiles. Check that the SSH key is loaded (ssh-add -l), then re-run." >&2
+        exit 1
+    fi
 else
     echo "Chezmoi vault already exists. Pulling latest changes..."
     chezmoi update
@@ -83,8 +87,7 @@ echo ">>> [9/11] CONFIGURING HELIX (Editor)..."
 # 1. Create local bin if it doesn't exist
 mkdir -p "$HOME/.local/bin"
 
-# 2. Download and extract the latest static binary
-# Using 25.01 as the current stable release
+# 2. Download and extract the pinned static binary (bump HELIX_VER to upgrade)
 HELIX_VER="25.07.1"
 curl -L "https://github.com/helix-editor/helix/releases/download/$HELIX_VER/helix-$HELIX_VER-x86_64-linux.tar.xz" -o /tmp/helix.tar.xz
 tar -xJf /tmp/helix.tar.xz -C /tmp/
@@ -92,8 +95,10 @@ tar -xJf /tmp/helix.tar.xz -C /tmp/
 # 3. Move the binary and runtime to user-controlled paths
 mv /tmp/helix-$HELIX_VER-x86_64-linux/hx "$HOME/.local/bin/"
 mkdir -p "$HOME/.config/helix"
-# Move runtime files so themes and LSP support work
-cp -rn /tmp/helix-$HELIX_VER-x86_64-linux/runtime "$HOME/.config/helix/"
+# Replace the runtime (grammars, queries, themes) so it always matches the binary.
+# Custom themes belong in ~/.config/helix/themes, not runtime/, so nothing of yours is lost.
+rm -rf "$HOME/.config/helix/runtime"
+cp -r /tmp/helix-$HELIX_VER-x86_64-linux/runtime "$HOME/.config/helix/"
 
 # Cleanup
 rm -rf /tmp/helix.tar.xz /tmp/helix-$HELIX_VER-x86_64-linux
